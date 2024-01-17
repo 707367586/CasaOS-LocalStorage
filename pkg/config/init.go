@@ -35,7 +35,7 @@ var (
 )
 
 func InitSetup(config string, sample string) {
-	ConfigFilePath = LocalStorageConfigFilePath
+	ConfigFilePath = LocalStorageConfigFilePath //"/etc/casaos/local-storage.conf"
 	if len(config) > 0 {
 		ConfigFilePath = config
 	}
@@ -65,8 +65,16 @@ func InitSetup(config string, sample string) {
 	}
 
 	mapTo("common", CommonInfo)
+	// RuntimePath: "/var/run/casaos"
 	mapTo("app", AppInfo)
+	// LogPath=/var/log/casaos
+	// LogSaveName=local-storage
+	// LogFileExt=log
+	// DBPath=/var/lib/casaos/db
+	// ShellPath=/usr/share/casaos/shell
 	mapTo("server", ServerInfo)
+	// USBAutoMount=
+	// EnableMergerFS=false
 }
 
 func SaveSetup(config string) {

@@ -21,8 +21,8 @@ func ListStorages(c *gin.Context) {
 	// }
 	// req.Validate()
 
-	//logger.Info("ListStorages", zap.Any("req", req))
-	//storages, total, err := service.MyService.Storage().GetStorages(req.Page, req.PerPage)
+	// logger.Info("ListStorages", zap.Any("req", req))
+	// storages, total, err := service.MyService.Storage().GetStorages(req.Page, req.PerPage)
 	// if err != nil {
 	// 	c.JSON(common_err.SUCCESS, model.Result{Success: common_err.SERVICE_ERROR, Message: common_err.GetMsg(common_err.SERVICE_ERROR), Data: err.Error()})
 	// 	return
@@ -32,7 +32,6 @@ func ListStorages(c *gin.Context) {
 	// 	Total:   total,
 	// }})
 	r, err := service.MyService.Storage().GetStorages()
-
 	if err != nil {
 		c.JSON(common_err.SUCCESS, model.Result{Success: common_err.SERVICE_ERROR, Message: common_err.GetMsg(common_err.SERVICE_ERROR), Data: err.Error()})
 		return

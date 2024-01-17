@@ -59,9 +59,9 @@ func SetSource(fspath string, sources []string) error {
 	}
 
 	value := []byte(strings.Join(dedupedSources, ":"))
-	//str, err := command.ExecResultStr("setfattr -n " + key + " -v " + string(string(value)) + " " + ctrlfile)
+	// str, err := command.ExecResultStr("setfattr -n " + key + " -v " + string(string(value)) + " " + ctrlfile)
 	err := syscall.Setxattr(ctrlfile, key, value, 0)
-	//logger.Error("SetSourceStr", zap.String("str", str))
+	// logger.Error("SetSourceStr", zap.String("str", str))
 	if err != nil {
 		logger.Error("SetSource", zap.Error(err))
 		return err

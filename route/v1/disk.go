@@ -232,6 +232,7 @@ func DeleteDisksUmount(c *gin.Context) {
 
 	c.JSON(common_err.SUCCESS, model.Result{Success: common_err.SUCCESS, Message: common_err.GetMsg(common_err.SUCCESS), Data: path})
 }
+
 func GetDiskSize(c *gin.Context) {
 	path := c.Query("path")
 	if len(path) == 0 {

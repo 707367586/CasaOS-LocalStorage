@@ -142,7 +142,7 @@ func GetGlobalDB(dbPath string) *gorm.DB {
 		panic(err)
 	}
 
-	_gdb = GetDBByFile(filepath.Join(dbPath, "local-storage.db"))
+	_gdb = GetDBByFile(filepath.Join(dbPath, "local-storage.db")) // 返回sqlitedb数据库对象
 
 	return _gdb
 }

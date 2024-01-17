@@ -27,7 +27,7 @@ type Services interface {
 }
 
 func NewService(db *gorm.DB) Services {
-	gatewayManagement, err := external.NewManagementService(config.CommonInfo.RuntimePath)
+	gatewayManagement, err := external.NewManagementService(config.CommonInfo.RuntimePath) // 创建和gateway中management server交互的类
 	if err != nil {
 		panic(err)
 	}
@@ -36,12 +36,12 @@ func NewService(db *gorm.DB) Services {
 	sharesService := external.NewShareService(config.CommonInfo.RuntimePath)
 
 	return &store{
-		usb:          NewUSBService(),
-		disk:         NewDiskService(db),
+		usb:          NewUSBService(),    // usb管理服务
+		disk:         NewDiskService(db), // 磁盘管理服务
 		localStorage: v2.NewLocalStorageService(db, wrapper.NewMountInfo()),
 		gateway:      gatewayManagement,
-		notify:       NewNotifyService(),
-		notifySystem: notifySystem,
+		notify:       NewNotifyService(), // 新的通知服务，通过message bus
+		notifySystem: notifySystem,       // 用来通知system_status消息给Casaos
 		shares:       sharesService,
 		storage:      NewStorageService(),
 	}

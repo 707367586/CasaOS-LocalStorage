@@ -117,7 +117,7 @@ func GetStorageList(c *gin.Context) {
 			} else {
 				stor.Label = blkChild.Label
 			}
-			//if _, ok := mapdb[stor.MountPoint]; ok || stor.Label == "System" {
+			// if _, ok := mapdb[stor.MountPoint]; ok || stor.Label == "System" {
 			storageArr = append(storageArr, stor)
 			//}
 
@@ -238,7 +238,6 @@ func PostAddStorage(c *gin.Context) {
 		// 		logger.Error("error when sending notification", zap.Error(err), zap.String("message path", messagePathStorageStatus), zap.Any("message", message))
 		// 	}
 		// }(currentDisk)
-
 	}
 	message := ""
 	for _, blkChild := range currentDisk.Children {
@@ -272,8 +271,8 @@ func PostAddStorage(c *gin.Context) {
 			service.MyService.Disk().UmountPointAndRemoveDir(blkChild)
 			message += blkChild.Path + "\n"
 			continue
-			//c.JSON(http.StatusInternalServerError, model.Result{Success: common_err.SERVICE_ERROR, Message: err.Error()})
-			//return
+			// c.JSON(http.StatusInternalServerError, model.Result{Success: common_err.SERVICE_ERROR, Message: err.Error()})
+			// return
 		}
 
 		// send notify to client

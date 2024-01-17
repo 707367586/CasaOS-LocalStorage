@@ -49,7 +49,6 @@ var (
 )
 
 func init() {
-
 	configFlag := flag.String("c", "", "config address")
 	dbFlag := flag.String("db", "", "db path")
 
@@ -65,20 +64,20 @@ func init() {
 	println("git commit:", commit)
 	println("build date:", date)
 
-	config.InitSetup(*configFlag, _confSample)
+	config.InitSetup(*configFlag, _confSample) // 初始化config
 
 	logger.LogInit(config.AppInfo.LogPath, config.AppInfo.LogSaveName, config.AppInfo.LogFileExt)
 
 	if len(*dbFlag) == 0 {
-		*dbFlag = config.AppInfo.DBPath
+		*dbFlag = config.AppInfo.DBPath // 赋值sqlite数据库路径
 	}
 
-	sqliteDB := sqlite.GetGlobalDB(*dbFlag)
+	sqliteDB := sqlite.GetGlobalDB(*dbFlag) // 获取sqllite db
 
-	service.MyService = service.NewService(sqliteDB)
+	service.MyService = service.NewService(sqliteDB) // 创建所有的service服务，将db对象传给service使用
 	service.Cache = cache.Init()
 
-	go service.MyService.Disk().CheckSerialDiskMount()
+	go service.MyService.Disk().CheckSerialDiskMount() // 查找块设备，检测设备健康程度，update到数据库db中
 
 	// if strings.ToLower(config.ServerInfo.EnableMergerFS) == "true" {
 	// 	if !merge.IsMergerFSInstalled() {
@@ -86,7 +85,7 @@ func init() {
 	// 		logger.Info("mergerfs is disabled")
 	// 	}
 	// }
-	service.MyService.Disk().EnsureDefaultMergePoint()
+	service.MyService.Disk().EnsureDefaultMergePoint() // 查看是否有需要merge的磁盘
 	// if strings.ToLower(config.ServerInfo.EnableMergerFS) == "true" {
 	// 	if !service.MyService.Disk().EnsureDefaultMergePoint() {
 	// 		config.ServerInfo.EnableMergerFS = "false"
@@ -98,13 +97,12 @@ func init() {
 	// go service.MyService.LocalStorage().CheckMergeMount()
 	// }
 
-	checkToken2_11()
+	checkToken2_11() // 判断如果是64位arm系统，且是树莓派则关闭USB自动挂载
 
-	go ensureDefaultDirectories()
+	go ensureDefaultDirectories() // 创建默认的文件夹路径
 	// service.MountLists = make(map[string]*mountlib.MountPoint)
 	// configfile.Install()
 	// service.MyService.Storage().CheckAndMountAll()
-
 }
 
 func checkToken2_11() {
@@ -142,17 +140,16 @@ func ensureDefaultDirectories() {
 }
 
 func main() {
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go monitorUEvent(ctx)
+	go monitorUEvent(ctx) // 监听uevent
 
-	go sendStorageStats()
+	go sendStorageStats() // 发送存储状态给casaos
 
-	crontab := cron.New(cron.WithSeconds())
+	crontab := cron.New(cron.WithSeconds()) // 创建定时任务
 	if _, err := crontab.AddFunc("@every 5s", sendStorageStats); err != nil {
-		logger.Error("crontab add func error", zap.Error(err))
+		logger.Error("crontab add func error", zap.Error(err)) // 每五秒发送一次存储状态
 	}
 
 	crontab.Start()
@@ -171,10 +168,10 @@ func main() {
 		// "/v1/cloud",
 		// "/v1/recover",
 		// "/v1/driver",
-		route.V2APIPath,
-		route.V2DocPath,
+		route.V2APIPath, // "/v2/local_storage"
+		route.V2DocPath, // "/doc/v2/local_storage"
 	}
-	for _, apiPath := range apiPaths {
+	for _, apiPath := range apiPaths { // 将api接口注册到gateway
 		err = service.MyService.Gateway().CreateRoute(&model.Route{
 			Path:   apiPath,
 			Target: "http://" + listener.Addr().String(),
@@ -184,14 +181,14 @@ func main() {
 			panic(err)
 		}
 	}
-	go RegMsg()
-	go service.MyService.Disk().InitCheck()
-	v1Router := route.InitV1Router()
-	v2Router := route.InitV2Router()
-	v2DocRouter := route.InitV2DocRouter(_docHTML, _docYAML)
+	go RegMsg()                                              // 注册事件消息到messagebus
+	go service.MyService.Disk().InitCheck()                  // 初始化磁盘检测
+	v1Router := route.InitV1Router()                         // 初始化v1路由
+	v2Router := route.InitV2Router()                         // 初始化v2路由
+	v2DocRouter := route.InitV2DocRouter(_docHTML, _docYAML) // 初始化v2文档路由
 
-	mux := &util_http.HandlerMultiplexer{
-		HandlerMap: map[string]http.Handler{
+	mux := &util_http.HandlerMultiplexer{ // 创建路由器
+		HandlerMap: map[string]http.Handler{ // 注册路由
 			"v1":  v1Router,
 			"v2":  v2Router,
 			"doc": v2DocRouter,
@@ -208,20 +205,21 @@ func main() {
 
 	logger.Info("LocalStorage service is listening...", zap.Any("address", listener.Addr().String()))
 
-	server := &http.Server{
+	server := &http.Server{ // 创建http服务
 		Handler:           mux,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
-	err = server.Serve(listener)
+	err = server.Serve(listener) // 启动http服务
 	if err != nil {
 		panic(err)
 	}
 }
+
 func RegMsg() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	var events []message_bus.EventType
+	var events []message_bus.EventType // 向messagebus注册事件events
 	events = append(events, message_bus.EventType{Name: common.ServiceName + ":merge_status", SourceID: common.ServiceName, PropertyTypeList: []message_bus.PropertyType{}})
 	events = append(events, message_bus.EventType{Name: common.ServiceName + ":storage_status", SourceID: common.ServiceName, PropertyTypeList: []message_bus.PropertyType{}})
 	// register at message bus
@@ -239,7 +237,7 @@ func RegMsg() {
 		time.Sleep(time.Second)
 	}
 	// register at message bus
-	for devtype, eventTypesByAction := range common.EventTypes {
+	for devtype, eventTypesByAction := range common.EventTypes { // 注册"local-storage:disk:added", "local-storage:disk:removed", "local-storage:storage:added","local-storage:storage:removed",
 		response, err := service.MyService.MessageBus().RegisterEventTypesWithResponse(ctx, lo.Values(eventTypesByAction))
 		if err != nil {
 			logger.Error("error when trying to register one or more event types - some event type will not be discoverable", zap.Error(err), zap.String("devtype", devtype))
@@ -249,5 +247,4 @@ func RegMsg() {
 			logger.Error("error when trying to register one or more event types - some event type will not be discoverable", zap.String("status", response.Status()), zap.String("body", string(response.Body)), zap.String("devtype", devtype))
 		}
 	}
-
 }

@@ -22,7 +22,7 @@ func sendDiskBySocket() {
 	status := model.DiskStatus{}
 	healthy := true
 
-	//var systemDisk *model.LSBLKModel
+	// var systemDisk *model.LSBLKModel
 
 	for _, currentDisk := range blkList {
 
@@ -97,25 +97,25 @@ func sendUSBBySocket() {
 func monitorUEvent(ctx context.Context) {
 	var matcher netlink.Matcher
 
-	conn := new(netlink.UEventConn)
+	conn := new(netlink.UEventConn) // 创建 Netlink UEvent 连接
 	if err := conn.Connect(netlink.UdevEvent); err != nil {
 		logger.Error("udev err", zap.Any("Unable to connect to Netlink Kobject UEvent socket", err))
 	}
 	defer conn.Close()
 
-	queue := make(chan netlink.UEvent)
+	queue := make(chan netlink.UEvent) // 创建用于接收 UEvent 的通道
 	defer close(queue)
 
-	errors := make(chan error)
+	errors := make(chan error) // 创建用于报告错误的通道
 	defer close(errors)
 
-	quit := conn.Monitor(queue, errors, matcher)
+	quit := conn.Monitor(queue, errors, matcher) // 启动 UEvent 监听
 	defer close(quit)
-
+	// 无限循环监听事件
 	for {
 		select {
 
-		case <-ctx.Done():
+		case <-ctx.Done(): // 当上下文被取消时退出循环
 			return
 
 		case uevent := <-queue:
@@ -137,11 +137,12 @@ func monitorUEvent(ctx context.Context) {
 					}
 				}
 				logger.Info("disk model", zap.Any("diskModel", event.Name))
+				// 发送事件到消息总线
 				response, err := service.MyService.MessageBus().PublishEventWithResponse(ctx, event.SourceID, event.Name, event.Properties)
 				if err != nil {
 					logger.Error("failed to publish event to message bus", zap.Error(err), zap.Any("event", event))
 				}
-
+				// 处理消息总线的响应
 				if response.StatusCode() != http.StatusOK {
 					logger.Error("failed to publish event to message bus", zap.String("status", response.Status()), zap.Any("response", response))
 				}
@@ -165,6 +166,6 @@ func monitorUEvent(ctx context.Context) {
 }
 
 func sendStorageStats() {
-	sendDiskBySocket()
-	sendUSBBySocket()
+	sendDiskBySocket() // 发送磁盘状态给casaos
+	sendUSBBySocket()  // 发送usb状态给casaos
 }

@@ -42,7 +42,7 @@ func ExecSmartCTLByPath(path string) []byte {
 	timeout := 6
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
 	defer cancel()
-	//smartctl -i -n standby /dev/sdc  TODO:https://www.ippa.top/956.html
+	// smartctl -i -n standby /dev/sdc  TODO:https://www.ippa.top/956.html
 	cmd := exec.CommandContext(ctx, "smartctl", "-a", "-n", "standby", path, "-j")
 
 	output, err := cmd.Output()

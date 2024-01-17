@@ -36,46 +36,46 @@ func InitV1Router() *gin.Engine {
 		func() (*ecdsa.PublicKey, error) {
 			return external.GetPublicKey(config.CommonInfo.RuntimePath)
 		},
-	))
+	)) // jwt验证
 
 	{
 		v1DisksGroup := v1Group.Group("/disks")
 		v1DisksGroup.Use()
 		{
 
-			v1DisksGroup.GET("", v1.GetDiskList)
-			v1DisksGroup.GET("/usb", v1.GetDisksUSBList)
-			v1DisksGroup.DELETE("/usb", v1.DeleteDiskUSB)
-			v1DisksGroup.DELETE("", v1.DeleteDisksUmount)
-			v1DisksGroup.GET("/size", v1.GetDiskSize)
+			v1DisksGroup.GET("", v1.GetDiskList)          // 获取磁盘列表
+			v1DisksGroup.GET("/usb", v1.GetDisksUSBList)  // 获取USB磁盘列表
+			v1DisksGroup.DELETE("/usb", v1.DeleteDiskUSB) // 删除USB磁盘
+			v1DisksGroup.DELETE("", v1.DeleteDisksUmount) // 卸载磁盘
+			v1DisksGroup.GET("/size", v1.GetDiskSize)     // 获取磁盘大小
 		}
 
 		v1StorageGroup := v1Group.Group("/storage")
 		v1StorageGroup.Use()
 		{
-			v1StorageGroup.POST("", v1.PostAddStorage)
+			v1StorageGroup.POST("", v1.PostAddStorage) // 添加存储
 
-			v1StorageGroup.PUT("", v1.PutFormatStorage)
+			v1StorageGroup.PUT("", v1.PutFormatStorage) // 格式化存储
 
-			v1StorageGroup.DELETE("", v1.DeleteStorage)
-			v1StorageGroup.GET("", v1.GetStorageList)
+			v1StorageGroup.DELETE("", v1.DeleteStorage) // 删除存储
+			v1StorageGroup.GET("", v1.GetStorageList)   // 获取存储列表
 		}
 		v1CloudGroup := v1Group.Group("/cloud")
 		v1CloudGroup.Use()
 		{
-			v1CloudGroup.GET("", v1.ListStorages)
-			v1CloudGroup.DELETE("", v1.UmountStorage)
+			v1CloudGroup.GET("", v1.ListStorages)     // 获取云盘列表
+			v1CloudGroup.DELETE("", v1.UmountStorage) // 卸载云盘
 		}
 		v1DriverGroup := v1Group.Group("/driver")
 		v1DriverGroup.Use()
 		{
-			v1DriverGroup.GET("", v1.ListDriverInfo)
+			v1DriverGroup.GET("", v1.ListDriverInfo) // 获取驱动信息
 		}
 		v1USBGroup := v1Group.Group("/usb")
 		v1USBGroup.Use()
 		{
-			v1USBGroup.PUT("/usb-auto-mount", v1.PutSystemUSBAutoMount) ///sys/usb/:status
-			v1USBGroup.GET("/usb-auto-mount", v1.GetSystemUSBAutoMount) ///sys/usb/status
+			v1USBGroup.PUT("/usb-auto-mount", v1.PutSystemUSBAutoMount) ///sys/usb/:status //设置USB自动挂载
+			v1USBGroup.GET("/usb-auto-mount", v1.GetSystemUSBAutoMount) ///sys/usb/status //获取USB自动挂载状态
 		}
 	}
 

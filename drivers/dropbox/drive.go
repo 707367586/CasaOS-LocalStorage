@@ -35,7 +35,6 @@ func (d *Dropbox) Init(ctx context.Context) error {
 }
 
 func (d *Dropbox) Drop(ctx context.Context) error {
-
 	return nil
 }
 
@@ -61,6 +60,7 @@ func (d *Dropbox) Link(ctx context.Context, file model.Obj, args model.LinkArgs)
 	}
 	return &link, nil
 }
+
 func (d *Dropbox) GetUserInfo(ctx context.Context) (string, error) {
 	url := "https://api.dropboxapi.com/2/users/get_current_account"
 	user := UserInfo{}
@@ -73,6 +73,7 @@ func (d *Dropbox) GetUserInfo(ctx context.Context) (string, error) {
 	logger.Info("resp", zap.Any("resp", string(resp)))
 	return user.Email, nil
 }
+
 func (d *Dropbox) MakeDir(ctx context.Context, parentDir model.Obj, dirName string) error {
 	return nil
 }
